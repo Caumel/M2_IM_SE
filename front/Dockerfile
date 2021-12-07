@@ -6,7 +6,6 @@ RUN mkdir -p /src
 WORKDIR /src
 ADD ./front /src/
 
-RUN pip install pipenv
-RUN pipenv install --system
+RUN pip install -r requirements.txt
 
 EXPOSE 8000

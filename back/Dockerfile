@@ -1,8 +1,7 @@
 FROM python:3.7-buster
 
-WORKDIR /back
+RUN mkdir -p /src
+WORKDIR /src
+ADD ./back /src/
 
-RUN pip install pipenv
-RUN pipenv install --system
-
-EXPOSE 8000
+RUN pip install -r requirements.txt

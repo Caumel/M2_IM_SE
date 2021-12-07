@@ -11,14 +11,14 @@ services:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
     volumes:
-      - ../db/:/data/db
+      - ../db/mongodb:/db_data/
 
   sqlite3:
     image: 'nouchka/sqlite3:latest'
     stdin_open: true
     tty: true
     volumes:
-      - ./db/:/root/db/
+      - ./db/sqllite:/root/db/
 
   front:
     build:
@@ -29,6 +29,7 @@ services:
       - 8080:8080
     volumes:
       - ../front/:/src
+    command: /bin/sh -c "while sleep 1000; do :; done"
     
   back:
     build:
@@ -39,12 +40,13 @@ services:
       - 8081:8081
     volumes:
       - ../back/:/src
+    command: /bin/sh -c "while sleep 1000; do :; done"
 
-  nginx:
-    build:
-      context: ..
-      dockerfile: ./nginx/Dockerfile
-    container_name: 'nginx'
-    ports:
-      - 80:80
-      - 443:443
+  # nginx:
+  #   build:
+  #     context: ..
+  #     dockerfile: ./nginx/Dockerfile
+  #   container_name: 'nginx'
+  #   ports:
+  #     - 80:80
+  #     - 443:443
