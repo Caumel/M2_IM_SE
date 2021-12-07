@@ -17,6 +17,8 @@ services:
     image: 'nouchka/sqlite3:latest'
     stdin_open: true
     tty: true
+    ports:
+      - 5000:5000
     volumes:
       - ./db/sqllite:/root/db/
 
