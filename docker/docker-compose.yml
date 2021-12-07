@@ -15,6 +15,7 @@ services:
 
   sqlite3:
     image: 'nouchka/sqlite3:latest'
+    container_name: 'sqlite'
     stdin_open: true
     tty: true
     ports:
@@ -31,7 +32,7 @@ services:
       - "8000:8000"
     volumes:
       - ../web/:/src
-    command: /bin/sh -c "while sleep 1000; do :; done"
+    command: /bin/sh -c "sleep 10; python -u manager.py runserver 0.0.0.0:8000"
 
   # nginx:
   #   build:
