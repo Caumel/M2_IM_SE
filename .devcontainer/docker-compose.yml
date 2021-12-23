@@ -6,18 +6,20 @@ services:
     image : mongo:latest
     container_name: mongodb
     restart: always
+    working_dir: /backup
     ports:
       - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
     volumes:
-      - ../db/mongodb:/db_data/
+      - ../db/mongodb/backup:/db_data/
 
   db:
     image: mysql:latest
     container_name: db
     restart: always
+    working_dir: /backup
     environment:
       MYSQL_DATABASE: db
       MYSQL_USER: user
@@ -28,7 +30,16 @@ services:
     expose:
       - '3306'
     volumes:
-      - ../db/sql:/var/lib/mysql
+      - ../db/sql/backup:/backup
+  
+  db_config:
+    image: docker
+    privileged: true
+    depends_on:
+      - db
+    volumes:
+      - ../db/sql/backup:/backup
+    command: sh -c 'sleep 5 && docker exec db mysql -u user -ppassword db < db.sql'
 
   web:
     build:
