@@ -2,44 +2,44 @@ version: '3.7'
 
 services:
 
-  mongo:
-    image : mongo:latest
-    container_name: mongodb
-    restart: always
-    working_dir: /backup
-    ports:
-      - 27017:27017
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin
-    volumes:
-      - ../db/mongodb/backup:/db_data/
+  # mongo:
+  #   image : mongo:latest
+  #   container_name: mongodb
+  #   restart: always
+  #   working_dir: /backup
+  #   ports:
+  #     - 27017:27017
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: admin
+  #     MONGO_INITDB_ROOT_PASSWORD: admin
+  #   volumes:
+  #     - ../db/mongodb/backup:/db_data/
 
-  db:
-    image: mysql:latest
-    container_name: db
-    restart: always
-    working_dir: /backup
-    environment:
-      MYSQL_DATABASE: db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      MYSQL_ROOT_PASSWORD: password
-    ports:
-      - '3306:3306'
-    expose:
-      - '3306'
-    volumes:
-      - ../db/sql/backup:/backup
+  # db:
+  #   image: mysql:latest
+  #   container_name: db
+  #   restart: always
+  #   working_dir: /backup
+  #   environment:
+  #     MYSQL_DATABASE: db
+  #     MYSQL_USER: user
+  #     MYSQL_PASSWORD: password
+  #     MYSQL_ROOT_PASSWORD: password
+  #   ports:
+  #     - '3306:3306'
+  #   expose:
+  #     - '3306'
+  #   volumes:
+  #     - ../db/sql/backup:/backup
   
-  db_config:
-    image: docker
-    privileged: true
-    depends_on:
-      - db
-    volumes:
-      - ../db/sql/backup:/backup
-    command: sh -c 'sleep 5 && docker exec db mysql -u user -ppassword db < db.sql'
+  # db_config:
+  #   image: docker
+  #   privileged: true
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - ../db/sql/backup:/backup
+  #   command: sh -c 'sleep 5 && docker exec db mysql -u user -ppassword db < /backup/db.sql'
 
   web:
     build:
@@ -51,12 +51,3 @@ services:
     volumes:
       - ../web/:/src
     command: /bin/sh -c "while sleep 1000; do :; done"
-
-  # nginx:
-  #   build:
-  #     context: ..
-  #     dockerfile: ./nginx/Dockerfile
-  #   container_name: 'nginx'
-  #   ports:
-  #     - 80:80
-  #     - 443:443
