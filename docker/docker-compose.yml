@@ -28,7 +28,7 @@ services:
     expose:
       - '3306'
     volumes:
-      - ../db/sql:/var/lib/mysql
+      - ../db/sql/backup:/docker-entrypoint-initdb.d
 
   web:
     build:

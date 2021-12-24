@@ -2,52 +2,58 @@ version: '3.7'
 
 services:
 
-  # mongo:
-  #   image : mongo:latest
-  #   container_name: mongodb
-  #   restart: always
-  #   working_dir: /backup
-  #   ports:
-  #     - 27017:27017
-  #   environment:
-  #     MONGO_INITDB_ROOT_USERNAME: admin
-  #     MONGO_INITDB_ROOT_PASSWORD: admin
-  #   volumes:
-  #     - ../db/mongodb/backup:/db_data/
+  mongo:
+    image : mongo:latest
+    container_name: mongodb
+    restart: always
+    working_dir: /backup
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    volumes:
+      - ../db/mongodb/backup:/backup
 
-  # db:
-  #   image: mysql:latest
-  #   container_name: db
-  #   restart: always
-  #   working_dir: /backup
-  #   environment:
-  #     MYSQL_DATABASE: db
-  #     MYSQL_USER: user
-  #     MYSQL_PASSWORD: password
-  #     MYSQL_ROOT_PASSWORD: password
-  #   ports:
-  #     - '3306:3306'
-  #   expose:
-  #     - '3306'
-  #   volumes:
-  #     - ../db/sql/backup:/backup
+  db:
+    image: mysql:latest
+    container_name: db
+    restart: always
+    working_dir: /backup
+    environment:
+      MYSQL_DATABASE: db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - ../db/sql/backup:/docker-entrypoint-initdb.d
+      - ../db/sql/backup:/backup
   
-  # db_config:
-  #   image: docker
-  #   privileged: true
-  #   depends_on:
-  #     - db
-  #   volumes:
-  #     - ../db/sql/backup:/backup
-  #   command: sh -c 'sleep 5 && docker exec db mysql -u user -ppassword db < /backup/db.sql'
-
   web:
     build:
       context: ..
       dockerfile: ./web/Dockerfile
     container_name: 'web'
+    environment:
+      DDBB_SQL_URL: db
+      DDBB_SQL_PORT: 3306
+      DDBB_SQL_USER: 'user'
+      DDBB_SQL_PASS: 'password'
+      DDBB_SQL_NAME: 'db'
+      DDBB_NOSQL_URL: mongo
+      DDBB_NOSQL_PORT: 27017
+      DDBB_NOSQL_USER: 'admin'
+      DDBB_NOSQL_PASS: 'admin'
+      DDBB_NOSQL_AUTHDB: 'admin'
     ports:
       - "8000:8000"
     volumes:
       - ../web/:/src
     command: /bin/sh -c "while sleep 1000; do :; done"
+
+
+## mysqldump --no-tablespaces -u user -p password db > db.sql

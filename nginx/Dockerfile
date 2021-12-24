@@ -1,8 +1,8 @@
-FROM nginx:latest
+# FROM nginx:latest
 
-RUN rm /etc/nginx/conf.d/default.conf
+# RUN rm /etc/nginx/conf.d/default.conf
 
-COPY nginx.conf /etc/nginx/conf.d/
+# COPY nginx.conf /etc/nginx/conf.d/
 
-COPY nginx.key /etc/nginx/
-COPY nginx.crt /etc/nginx/
+# COPY nginx.key /etc/nginx/
+# COPY nginx.crt /etc/nginx/
