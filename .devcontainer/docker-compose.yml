@@ -45,6 +45,7 @@ services:
       DDBB_SQL_URL: db
       DDBB_SQL_PORT: 3306
       DDBB_SQL_USER: 'user'
+      DDBB_SQL_USER_ROOT: 'root'
       DDBB_SQL_PASS: 'password'
       DDBB_SQL_NAME: 'db'
       DDBB_NOSQL_URL: mongo
