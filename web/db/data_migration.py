@@ -33,6 +33,8 @@ clientM.clean_collection("Library")
 clientM.clean_collection("Community")
 clientM.clean_collection("Game")
 clientM.clean_collection("Review")
+clientM.clean_collection("Review_rate")
+clientM.clean_collection("Original_Game_rate")
 
 # colCompany = database["Company"]
 # colOriginalGame = database["Original_game"]
@@ -224,10 +226,6 @@ for index,element in enumerate(review):
     element["date"] = element["date"].strftime('%Y-%m-%d')
     element["userId"] = user_id[element["Useruser_id"]]
     del element["Useruser_id"]
-    # if element["Original_Gameoriginal_game_id"]==None:
-    #     print("asda")
-    # elif element["Companycompany_id"]==None:
-    #     print("asda2")
     try:
         element["OriginalGameId"] = original_game_id[element["Original_Gameoriginal_game_id"]]
     except Exception as e:
@@ -242,9 +240,25 @@ for index,element in enumerate(review):
     review_id[index+1] = str(result.inserted_id)
 print(review_id)
 
+#Review rate
+review_rate_id = {}
+for index,element in enumerate(user_rate_review):
+    element["UserId"] = user_id[element["Useruser_id"]]
+    del element["Useruser_id"]
+    element["ReviewId"] = review_id[element["Reviewreview_id"]]
+    del element["Reviewreview_id"]
+    result = clientM.insert_one("Review_rate",element)
+    review_rate_id[index+1] = str(result.inserted_id)
+print(review_rate_id)
 
-### falta la tabla de rate original game y company
-### Falta la tabla subscrite community para la date
-### tabla de user follow user (Añado el date como un diccionario ?)
+#Original Game rate
+original_game_rate_id = {}
+for index,element in enumerate(user_rate_original_game):
+    element["UserId"] = user_id[element["Useruser_id"]]
+    del element["Useruser_id"]
+    element["OriginalGameId"] = original_game_id[element["Original_Gameoriginal_game_id"]]
+    del element["Original_Gameoriginal_game_id"]
+    result = clientM.insert_one("Original_Game_rate",element)
+    original_game_rate_id[index+1] = str(result.inserted_id)
+print(original_game_rate_id)
 
-#Change game buy user date, for buyDate 
