@@ -12,6 +12,9 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_NON_ROOT_USERNAME: user
+      MONGO_NON_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: db
     volumes:
       - ../db/mongodb/backup:/backup
 

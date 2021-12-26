@@ -31,6 +31,10 @@ class DBClient:
                                   authSource=mongo_authdb)
         self.database = database_name
 
+    def createDatabase(self, name):
+        database = self.client[name]
+        return database
+
     def clean_collection(self, collection):
         """
         Deletes all documents in the specified collection.
