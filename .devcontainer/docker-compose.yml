@@ -60,4 +60,4 @@ services:
     command: /bin/sh -c "while sleep 1000; do :; done"
 
 
-## mysqldump --no-tablespaces -u user -p password db > db.sql
+## mysqldump --no-tablespaces -u root -ppassword db > db.sql
