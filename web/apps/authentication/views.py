@@ -7,10 +7,29 @@ Copyright (c) 2019 - present AppSeed.us
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, SignUpForm
+from django.contrib.auth.models import User
+
+from db.clientSQL import clientSQL
+import os
+
+SQL_URL = os.getenv("DDBB_SQL_URL","localhost")
+SQL_PORT = os.getenv("DDBB_SQL_PORT",3306)
+SQL_USER = os.getenv("DDBB_SQL_USER","user")
+SQL_PASS = os.getenv("DDBB_SQL_PASS","password")
+SQL_NAME = os.getenv("DDBB_SQL_NAME","db")
+
+mysql = clientSQL(SQL_USER,SQL_PASS,SQL_URL,SQL_PORT,SQL_NAME)
 
 
 def login_view(request):
+    try:
+        user = User.objects.create_user('luis', 'luiscaumel@gmail.com', 'password1111')
+        user = User.objects.create_user('luis1', 'luiscaumel@gmail.com', 'password1111')
+    except:
+        print("Usuarios ya en base de datos")
+
     form = LoginForm(request.POST or None)
+
 
     msg = None
 

@@ -33,7 +33,7 @@ services:
     expose:
       - '3306'
     volumes:
-      - ../db/sql/backup:/docker-entrypoint-initdb.d
+      #- ../db/sql/backup:/docker-entrypoint-initdb.d
       - ../db/sql/backup:/backup
   
   web:
@@ -56,6 +56,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ../db:/db
       - ../web/:/src
     command: /bin/sh -c "while sleep 1000; do :; done"
 

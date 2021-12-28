@@ -9,6 +9,15 @@ class clientSQL:
                         database=database,
                     )
         self.client = self.mydb.cursor()
+    
+    def setClient(self, client):
+        self.client = client
+
+    def close(self):
+        self.client.close()
+
+    def cursor(self):
+        self.client = self.mydb.cursor()
 
     def getColumnNames(self,client,tableName):
         columns = "*"
