@@ -10,6 +10,7 @@ urlpatterns = [
 
 
     path('actionUrl',views.importSQL, name='actionUrl'),
+    path('migrationUrl',views.migrationMethod, name='migrationUrl'),
     # The home page
     path('', views.index, name='home'),
     # Matches any html file

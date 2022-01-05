@@ -13,7 +13,12 @@ from django.shortcuts import redirect
 
 
 from db.clientSQL import clientSQL
+
+from db.data_migration import migrationNoSQL
+
 import os
+
+PRINT = False
 
 SQL_URL = os.getenv("DDBB_SQL_URL","localhost")
 SQL_PORT = os.getenv("DDBB_SQL_PORT",3306)
@@ -77,10 +82,13 @@ def executeScriptsFromFile(filename):
             print("Command skipped: ", msg)
 
 def importSQL(request):
+    global PRINT
+    if PRINT:
+        print("asda")
+    PRINT = True
 
     executeScriptsFromFile('/db/sql/backup/db.sql')
     mysql.mydb.commit()
-
 
     sql = "DELETE FROM User"
     mysql.client.execute(sql)
@@ -97,6 +105,47 @@ def importSQL(request):
 
     context = {'segment': 'index'}
     html_template = loader.get_template('home/dashboard.html')
-    print("asda")
+
     return redirect(request.META['HTTP_REFERER'])
     return HttpResponse(html_template.render(context, request))
+
+def migrationMethod(request):
+    global PRINT
+    if PRINT:
+        print("asda")
+    migration = migrationNoSQL()
+    migration.cleanDatabase(migration.clientM)
+    migration.importDataMongo()
+
+    context = {'segment': 'index'}
+    html_template = loader.get_template('home/dashboard.html')
+
+    return redirect(request.META['HTTP_REFERER'])
+    return HttpResponse(html_template.render(context, request))
+
+def caseUse1():
+    """
+    SELECT  ULGame.price, Original_Game.name, ULGame.refounded, ULGame.`date`, Original_Game.rating
+    FROM (
+            SELECT UserLibrary.email, Game.price, Game.refounded, Game.`date`, Game.Original_Gameoriginal_game_id 
+            FROM (
+                    SELECT User.email, User.password, User.carddata, Library.number_of_games, Library.library_id 
+                    FROM User 
+                    LEFT JOIN Library 
+                    ON User.user_id = Library.library_id
+                    WHERE User.email = 'luiscaumel@gmail.com'
+                ) 
+            AS UserLibrary
+            LEFT JOIN Game
+            ON UserLibrary.library_id = Game.Librarylibrary_id
+            ORDER BY price DESC
+        ) 
+    AS ULGame
+    LEFT JOIN Original_Game
+    ON ULGame.Original_Gameoriginal_game_id = Original_Game.original_game_id
+    """
+    query = "SELECT ULGame.price, Original_Game.name, ULGame.refounded, ULGame.`date`, Original_Game.rating FROM (SELECT UserLibrary.email, Game.price, Game.refounded, Game.`date`, Game.Original_Gameoriginal_game_id FROM (SELECT User.email, User.password, User.carddata, Library.number_of_games, Library.library_id FROM User LEFT JOIN Library ON User.user_id = Library.library_id WHERE User.email = 'luiscaumel@gmail.com') AS UserLibrary LEFT JOIN Game ON UserLibrary.library_id = Game.Librarylibrary_id ORDER BY price DESC) AS ULGame LEFT JOIN Original_Game ON ULGame.Original_Gameoriginal_game_id = Original_Game.original_game_id"
+    mysql.client.execute(query)
+    result = mysql.client.fetchall()
+    result = [list(row) for row in result]
+    print(result)
