@@ -197,7 +197,7 @@ class migrationNoSQL:
         library_id = {}
         for index,element in enumerate(library):
             del element["library_id"]
-            element["userId"] = user_id[element["Useruser_id"]]
+            element["userId"] = ObjectId(user_id[element["Useruser_id"]])
             del element["Useruser_id"]
             result = clientM.insert_one("Library",element)
             library_id[index+1] = str(result.inserted_id)
@@ -207,9 +207,9 @@ class migrationNoSQL:
         game_id = {}
         for index,element in enumerate(game):
             del element["game_id"]
-            element["libraryId"] = library_id[element["Librarylibrary_id"]]
+            element["libraryId"] = ObjectId(library_id[element["Librarylibrary_id"]])
             del element["Librarylibrary_id"]
-            element["OriginalGameId"] = original_game_id[element["Original_Gameoriginal_game_id"]]
+            element["OriginalGameId"] = ObjectId(original_game_id[element["Original_Gameoriginal_game_id"]])
             del element["Original_Gameoriginal_game_id"]
             element["date"] = element["date"].strftime('%Y-%m-%d')
             result = clientM.insert_one("Game",element)

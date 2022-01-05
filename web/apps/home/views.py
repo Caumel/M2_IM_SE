@@ -13,6 +13,7 @@ from django.shortcuts import redirect
 
 
 from db.clientSQL import clientSQL
+from db.client import DBClient
 
 from db.data_migration import migrationNoSQL
 
@@ -27,6 +28,15 @@ SQL_PASS = os.getenv("DDBB_SQL_PASS","password")
 SQL_NAME = os.getenv("DDBB_SQL_NAME","db")
 
 mysql = clientSQL(SQL_USER,SQL_PASS,SQL_URL,SQL_PORT,SQL_NAME)
+
+NOSQL_URL = os.getenv("DDBB_NOSQL_URL","localhost")
+NOSQL_PORT = os.getenv("DDBB_NOSQL_PORT",27017)
+NOSQL_USER = os.getenv("DDBB_NOSQL_USER","admin")
+NOSQL_PASS = os.getenv("DDBB_NOSQL_PASS","admin")
+NOSQL_NAME = os.getenv("DDBB_NOSQL_NAME","db")
+NOSQL_AUTH = os.getenv("DDBB_NOSQL_AUTHDB","admin")
+
+clientM = DBClient(NOSQL_URL,NOSQL_NAME,NOSQL_USER,NOSQL_PASS,NOSQL_AUTH)
 
 @login_required(login_url="/login/")
 def index(request):
@@ -107,7 +117,6 @@ def importSQL(request):
     html_template = loader.get_template('home/dashboard.html')
 
     return redirect(request.META['HTTP_REFERER'])
-    return HttpResponse(html_template.render(context, request))
 
 def migrationMethod(request):
     global PRINT
@@ -121,7 +130,6 @@ def migrationMethod(request):
     html_template = loader.get_template('home/dashboard.html')
 
     return redirect(request.META['HTTP_REFERER'])
-    return HttpResponse(html_template.render(context, request))
 
 def caseUse1():
     """
@@ -149,3 +157,171 @@ def caseUse1():
     result = mysql.client.fetchall()
     result = [list(row) for row in result]
     print(result)
+
+def useCase1NoSQL():
+    """
+    db.Game.aggregate([
+        {
+            $lookup:
+                {
+                    from:"Library",
+                    localField: "libraryId",
+                    foreignField: "_id",
+                    as: "library"
+                }
+        },
+        {
+            "$unwind":"$library"
+        },
+        {
+            $project:
+                {   
+                    price:1,
+                    refounded:1,
+                    date:1,
+                    OriginalGameId:1,
+                    number_of_games: "$library.number_of_games",
+                    userId: "$library.userId",
+                }
+        },
+        {
+            $lookup:
+                {
+                    from:"Original_Game",
+                    localField: "OriginalGameId",
+                    foreignField: "_id",
+                    as: "OriginalGame"
+                }
+        },
+        {
+            "$unwind":"$OriginalGame"
+        },
+        {
+            $project:
+                {
+                    Name: "$OriginalGame.name",
+                    Rating: "$OriginalGame.rating",
+                    price:1,
+                    refounded:1,
+                    date:1,
+                    number_of_games:1,
+                    userId: 1,
+                }
+        },
+        {
+            $lookup:
+                {
+                    from:"User",
+                    localField: "userId",
+                    foreignField: "_id",
+                    as: "user"
+                }
+        },
+        {
+            "$unwind":"$user"
+        },
+        {
+            $project:
+                {
+                    _id:0,
+                    Name: 1,
+                    Rating: 1,
+                    price:1,
+                    refounded:1,
+                    date:1,
+                    number_of_games:1,
+                    email: "$user.email",
+                }
+        },
+        {
+            $match: {"email":"luiscaumel@gmail.com"},
+        },
+        {
+            $sort:{"price": -1}
+        }
+    ])
+    """
+
+    pipeline = [{
+            "$lookup":
+                {
+                    "from":"Library",
+                    "localField": "libraryId",
+                    "foreignField": "_id",
+                    "as": "library"
+                }
+        },
+        {
+            "$unwind":"$library"
+        },
+        {
+            "$project":
+                {   
+                    "price":1,
+                    "refounded":1,
+                    "date":1,
+                    "OriginalGameId":1,
+                    "number_of_games": "$library.number_of_games",
+                    "userId": "$library.userId",
+                }
+        },
+        {
+            "$lookup":
+                {
+                    "from":"Original_Game",
+                    "localField": "OriginalGameId",
+                    "foreignField": "_id",
+                    "as": "OriginalGame"
+                }
+        },
+        {
+            "$unwind":"$OriginalGame"
+        },
+        {
+            "$project":
+                {
+                    "Name": "$OriginalGame.name",
+                    "Rating": "$OriginalGame.rating",
+                    "price":1,
+                    "refounded":1,
+                    "date":1,
+                    "number_of_games":1,
+                    "userId": 1,
+                }
+        },
+        {
+            "$lookup":
+                {
+                    "from":"User",
+                    "localField": "userId",
+                    "foreignField": "_id",
+                    "as": "user"
+                }
+        },
+        {
+            "$unwind":"$user"
+        },
+        {
+            "$project":
+                {
+                    "_id":0,
+                    "Name": 1,
+                    "Rating": 1,
+                    "price":1,
+                    "refounded":1,
+                    "date":1,
+                    "number_of_games":1,
+                    "email": "$user.email",
+                }
+        },
+        {
+            "$match": {"email":"luiscaumel@gmail.com"},
+        },
+        {
+            "$sort":{"price": -1}
+        }]
+    result = clientM.client["db"]["Game"].aggregate(pipeline)
+    resultList = []
+    for i in result:
+        resultList.append(i)
+    print(resultList)
