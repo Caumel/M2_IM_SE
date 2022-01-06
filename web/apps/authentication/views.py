@@ -23,8 +23,13 @@ mysql = clientSQL(SQL_USER,SQL_PASS,SQL_URL,SQL_PORT,SQL_NAME)
 
 def login_view(request):
     try:
-        user = User.objects.create_user('luis', 'luiscaumel@gmail.com', 'password1111')
-        user = User.objects.create_user('luis1', 'luiscaumel@gmail.com', 'password1111')
+        user = User.objects.create_user('luiscaumel@gmail.com', 'luiscaumel@gmail.com', 'password1111')
+        sql = "INSERT INTO User (user_id,email,password,carddata) VALUES (%s,%s,%s,%s)"
+        val = [
+            (1,"luiscaumel@gmail.com","password","0000-0000-0000-0000")
+        ]
+        mysql.client.executemany(sql,val)
+        mysql.mydb.commit()
     except:
         print("Usuarios ya en base de datos")
 
@@ -49,17 +54,30 @@ def login_view(request):
 
     return render(request, "accounts/login.html", {"form": form, "msg": msg})
 
+number = 2
 
 def register_user(request):
+    global number
     msg = None
     success = False
-
     if request.method == "POST":
         form = SignUpForm(request.POST)
         if form.is_valid():
             form.save()
-            username = form.cleaned_data.get("username")
+            username = form.cleaned_data.get("email")
             raw_password = form.cleaned_data.get("password1")
+            email = form.cleaned_data.get("email")
+            carddata = form.cleaned_data.get("carddata")
+
+            sql = "INSERT INTO User (user_id,email,password,carddata) VALUES (%s,%s,%s,%s)"
+            val = [
+                (number + 1,email,raw_password,carddata)
+            ]
+            number += 1
+            mysql.client.executemany(sql,val)
+            mysql.mydb.commit()
+
+            print(email,carddata,raw_password)
             user = authenticate(username=username, password=raw_password)
 
             msg = 'User created - please <a href="/login">login</a>.'

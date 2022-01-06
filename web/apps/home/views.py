@@ -101,14 +101,13 @@ def importSQL(request):
     executeScriptsFromFile('/db/sql/backup/db.sql')
     mysql.mydb.commit()
 
-    sql = "DELETE FROM User"
+    sql = "DELETE FROM User WHERE email = 'l.caumel@gmail.com'"
     mysql.client.execute(sql)
     mysql.mydb.commit()
 
     # #Añador nuevos usuarios
     sql = "INSERT INTO User (user_id,email,password,carddata) VALUES (%s,%s,%s,%s)"
     val = [
-        (1,"luiscaumel@gmail.com","password","0000-0000-0000-0000"),
         (2,"l.caumel@gmail.com","password","0000-0000-0000-0001")
     ]
     mysql.client.executemany(sql,val)
@@ -255,106 +254,106 @@ def useCase1NoSQL(request):
 
 
 
-    """
-    SELECT  ULGame.price, Original_Game.name, ULGame.refounded, ULGame.`date`, Original_Game.rating
-    FROM (
-            SELECT UserLibrary.email, Game.price, Game.refounded, Game.`date`, Game.Original_Gameoriginal_game_id 
-            FROM (
-                    SELECT User.email, User.password, User.carddata, Library.number_of_games, Library.library_id 
-                    FROM User 
-                    LEFT JOIN Library 
-                    ON User.user_id = Library.library_id
-                    WHERE User.email = 'luiscaumel@gmail.com'
-                ) 
-            AS UserLibrary
-            LEFT JOIN Game
-            ON UserLibrary.library_id = Game.Librarylibrary_id
-            ORDER BY price DESC
-        ) 
-    AS ULGame
-    LEFT JOIN Original_Game
-    ON ULGame.Original_Gameoriginal_game_id = Original_Game.original_game_id
-    """
+"""
+SELECT  ULGame.price, Original_Game.name, ULGame.refounded, ULGame.`date`, Original_Game.rating
+FROM (
+        SELECT UserLibrary.email, Game.price, Game.refounded, Game.`date`, Game.Original_Gameoriginal_game_id 
+        FROM (
+                SELECT User.email, User.password, User.carddata, Library.number_of_games, Library.library_id 
+                FROM User 
+                LEFT JOIN Library 
+                ON User.user_id = Library.library_id
+                WHERE User.email = 'luiscaumel@gmail.com'
+            ) 
+        AS UserLibrary
+        LEFT JOIN Game
+        ON UserLibrary.library_id = Game.Librarylibrary_id
+        ORDER BY price DESC
+    ) 
+AS ULGame
+LEFT JOIN Original_Game
+ON ULGame.Original_Gameoriginal_game_id = Original_Game.original_game_id
+"""
 
-    """
-    db.Game.aggregate([
-        {
-            $lookup:
-                {
-                    from:"Library",
-                    localField: "libraryId",
-                    foreignField: "_id",
-                    as: "library"
-                }
-        },
-        {
-            "$unwind":"$library"
-        },
-        {
-            $project:
-                {   
-                    price:1,
-                    refounded:1,
-                    date:1,
-                    OriginalGameId:1,
-                    number_of_games: "$library.number_of_games",
-                    userId: "$library.userId",
-                }
-        },
-        {
-            $lookup:
-                {
-                    from:"Original_Game",
-                    localField: "OriginalGameId",
-                    foreignField: "_id",
-                    as: "OriginalGame"
-                }
-        },
-        {
-            "$unwind":"$OriginalGame"
-        },
-        {
-            $project:
-                {
-                    Name: "$OriginalGame.name",
-                    Rating: "$OriginalGame.rating",
-                    price:1,
-                    refounded:1,
-                    date:1,
-                    number_of_games:1,
-                    userId: 1,
-                }
-        },
-        {
-            $lookup:
-                {
-                    from:"User",
-                    localField: "userId",
-                    foreignField: "_id",
-                    as: "user"
-                }
-        },
-        {
-            "$unwind":"$user"
-        },
-        {
-            $project:
-                {
-                    _id:0,
-                    Name: 1,
-                    Rating: 1,
-                    price:1,
-                    refounded:1,
-                    date:1,
-                    number_of_games:1,
-                    email: "$user.email",
-                }
-        },
-        {
-            $match: {"email":"luiscaumel@gmail.com"},
-        },
-        {
-            $sort:{"price": -1}
-        }
-    ])
+"""
+db.Game.aggregate([
+    {
+        $lookup:
+            {
+                from:"Library",
+                localField: "libraryId",
+                foreignField: "_id",
+                as: "library"
+            }
+    },
+    {
+        "$unwind":"$library"
+    },
+    {
+        $project:
+            {   
+                price:1,
+                refounded:1,
+                date:1,
+                OriginalGameId:1,
+                number_of_games: "$library.number_of_games",
+                userId: "$library.userId",
+            }
+    },
+    {
+        $lookup:
+            {
+                from:"Original_Game",
+                localField: "OriginalGameId",
+                foreignField: "_id",
+                as: "OriginalGame"
+            }
+    },
+    {
+        "$unwind":"$OriginalGame"
+    },
+    {
+        $project:
+            {
+                Name: "$OriginalGame.name",
+                Rating: "$OriginalGame.rating",
+                price:1,
+                refounded:1,
+                date:1,
+                number_of_games:1,
+                userId: 1,
+            }
+    },
+    {
+        $lookup:
+            {
+                from:"User",
+                localField: "userId",
+                foreignField: "_id",
+                as: "user"
+            }
+    },
+    {
+        "$unwind":"$user"
+    },
+    {
+        $project:
+            {
+                _id:0,
+                Name: 1,
+                Rating: 1,
+                price:1,
+                refounded:1,
+                date:1,
+                number_of_games:1,
+                email: "$user.email",
+            }
+    },
+    {
+        $match: {"email":"luiscaumel@gmail.com"},
+    },
+    {
+        $sort:{"price": -1}
+    }
+])
 """
