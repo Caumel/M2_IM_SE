@@ -8,7 +8,7 @@ from apps.home import views
 
 urlpatterns = [
 
-
+    path('reportLuis.html',views.useCase1NoSQL),
     path('actionUrl',views.importSQL, name='actionUrl'),
     path('migrationUrl',views.migrationMethod, name='migrationUrl'),
     # The home page
