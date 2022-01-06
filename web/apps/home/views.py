@@ -3,7 +3,7 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-from django import template
+from django import db, template
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
@@ -20,8 +20,9 @@ from db.client import DBClient
 from db.data_migration import migrationNoSQL
 
 import os
+import time
 
-PRINT = False
+kindDB = "SQL"
 
 SQL_URL = os.getenv("DDBB_SQL_URL","localhost")
 SQL_PORT = os.getenv("DDBB_SQL_PORT",3306)
@@ -94,10 +95,8 @@ def executeScriptsFromFile(filename):
             print("Command skipped: ", msg)
 
 def importSQL(request):
-    global PRINT
-    if PRINT:
-        print("asda")
-    PRINT = True
+    global kindDB
+    kindDB = "SQL"
 
     executeScriptsFromFile('/db/sql/backup/db.sql')
     mysql.mydb.commit()
@@ -115,120 +114,141 @@ def importSQL(request):
     mysql.client.executemany(sql,val)
     mysql.mydb.commit()
 
+    time.sleep(2)
+
     context = {'segment': 'index'}
     html_template = loader.get_template('home/dashboard.html')
 
     return redirect(request.META['HTTP_REFERER'])
 
 def migrationMethod(request):
-    global PRINT
-    if PRINT:
-        print("asda")
+
+    global kindDB
+    kindDB = "NoSQL"
+    
+
     migration = migrationNoSQL()
     migration.cleanDatabase(migration.clientM)
     migration.importDataMongo()
+
+    time.sleep(2)
 
     context = {'segment': 'index'}
     html_template = loader.get_template('home/dashboard.html')
 
     return redirect(request.META['HTTP_REFERER'])
 
-def caseUse1():
-
-    query = "SELECT ULGame.price, Original_Game.name, ULGame.refounded, ULGame.`date`, Original_Game.rating FROM (SELECT UserLibrary.email, Game.price, Game.refounded, Game.`date`, Game.Original_Gameoriginal_game_id FROM (SELECT User.email, User.password, User.carddata, Library.number_of_games, Library.library_id FROM User LEFT JOIN Library ON User.user_id = Library.library_id WHERE User.email = 'luiscaumel@gmail.com') AS UserLibrary LEFT JOIN Game ON UserLibrary.library_id = Game.Librarylibrary_id ORDER BY price DESC) AS ULGame LEFT JOIN Original_Game ON ULGame.Original_Gameoriginal_game_id = Original_Game.original_game_id"
-    mysql.client.execute(query)
-    columnNames = mysql.client.description
-    print(columnNames)
-    result = mysql.client.fetchall()
-    result = [list(row) for row in result]
-    print(result)
-
 def useCase1NoSQL(request):
-    pipeline = [{
-            "$lookup":
-                {
-                    "from":"Library",
-                    "localField": "libraryId",
-                    "foreignField": "_id",
-                    "as": "library"
-                }
-        },
-        {
-            "$unwind":"$library"
-        },
-        {
-            "$project":
-                {   
-                    "price":1,
-                    "refounded":1,
-                    "date":1,
-                    "OriginalGameId":1,
-                    "number_of_games": "$library.number_of_games",
-                    "userId": "$library.userId",
-                }
-        },
-        {
-            "$lookup":
-                {
-                    "from":"Original_Game",
-                    "localField": "OriginalGameId",
-                    "foreignField": "_id",
-                    "as": "OriginalGame"
-                }
-        },
-        {
-            "$unwind":"$OriginalGame"
-        },
-        {
-            "$project":
-                {
-                    "Name": "$OriginalGame.name",
-                    "Rating": "$OriginalGame.rating",
-                    "price":1,
-                    "refounded":1,
-                    "date":1,
-                    "userId": 1,
-                }
-        },
-        {
-            "$lookup":
-                {
-                    "from":"User",
-                    "localField": "userId",
-                    "foreignField": "_id",
-                    "as": "user"
-                }
-        },
-        {
-            "$unwind":"$user"
-        },
-        {
-            "$project":
-                {
-                    "_id":0,
-                    "Name": 1,
-                    "Rating": 1,
-                    "price":1,
-                    "refounded":1,
-                    "date":1,
-                    "email": "$user.email",
-                }
-        },
-        {
-            "$match": {"email":"luiscaumel@gmail.com"},
-        },
-        {
-            "$sort":{"price": -1}
-        }]
-    result = clientM.client["db"]["Game"].aggregate(pipeline)
-    resultList = []
-    for i in result:
-        resultList.append(i)
-    print(resultList)
 
+    global kindDB
+
+    if kindDB == "SQL":
+        query = "SELECT ULGame.price, Original_Game.name, ULGame.refounded, ULGame.`date`, Original_Game.rating, ULGame.email FROM (SELECT UserLibrary.email, Game.price, Game.refounded, Game.`date`, Game.Original_Gameoriginal_game_id FROM (SELECT User.email, User.password, User.carddata, Library.number_of_games, Library.library_id FROM User LEFT JOIN Library ON User.user_id = Library.library_id WHERE User.email = 'luiscaumel@gmail.com') AS UserLibrary LEFT JOIN Game ON UserLibrary.library_id = Game.Librarylibrary_id ORDER BY price DESC) AS ULGame LEFT JOIN Original_Game ON ULGame.Original_Gameoriginal_game_id = Original_Game.original_game_id"
+        mysql.client.execute(query)
+        result = mysql.client.fetchall()
+        result = [list(row) for row in result]
+        result_dict = []
+        for i in result:
+            game = {}
+            game["Name"] = i[1]
+            game["price"] = i[0]
+            game["Rating"] = i[4]
+            game["date"] = i[3].strftime("%Y-%m-%d")
+            if i[2]==0:
+                game["refounded"] = False
+            else:
+                game["refounded"] = True
+            game["email"] = i[5]
+            game["Kind"] = "SQL"
+            result_dict.append(game)
+        
+    
+    elif kindDB == "NoSQL":
+        pipeline = [{
+                "$lookup":
+                    {
+                        "from":"Library",
+                        "localField": "libraryId",
+                        "foreignField": "_id",
+                        "as": "library"
+                    }
+            },
+            {
+                "$unwind":"$library"
+            },
+            {
+                "$project":
+                    {   
+                        "price":1,
+                        "refounded":1,
+                        "date":1,
+                        "OriginalGameId":1,
+                        "number_of_games": "$library.number_of_games",
+                        "userId": "$library.userId",
+                    }
+            },
+            {
+                "$lookup":
+                    {
+                        "from":"Original_Game",
+                        "localField": "OriginalGameId",
+                        "foreignField": "_id",
+                        "as": "OriginalGame"
+                    }
+            },
+            {
+                "$unwind":"$OriginalGame"
+            },
+            {
+                "$project":
+                    {
+                        "Name": "$OriginalGame.name",
+                        "Rating": "$OriginalGame.rating",
+                        "price":1,
+                        "refounded":1,
+                        "date":1,
+                        "userId": 1,
+                    }
+            },
+            {
+                "$lookup":
+                    {
+                        "from":"User",
+                        "localField": "userId",
+                        "foreignField": "_id",
+                        "as": "user"
+                    }
+            },
+            {
+                "$unwind":"$user"
+            },
+            {
+                "$project":
+                    {
+                        "_id":0,
+                        "Name": 1,
+                        "Rating": 1,
+                        "price":1,
+                        "refounded":1,
+                        "date":1,
+                        "email": "$user.email",
+                    }
+            },
+            {
+                "$match": {"email":"luiscaumel@gmail.com"},
+            },
+            {
+                "$sort":{"price": -1}
+            }]
+        result = clientM.client["db"]["Game"].aggregate(pipeline)
+        result_dict = []
+        for i in result:
+            i["Kind"] = "NoSQL"
+            result_dict.append(i)
+
+    print(result_dict)
     context = {
-        'resultList': resultList,
-        'column': resultList[0].keys()
+        'resultList': result_dict,
         }
 
     return render(request, 'home/reportLuis.html', context)

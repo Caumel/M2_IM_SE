@@ -17,17 +17,16 @@
                           <svg class="icon icon-xxs" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                       </a>
                   </li>
-                  <li class="breadcrumb-item"><a href="#">Volt</a></li>
-                  <li class="breadcrumb-item active" aria-current="page">Transactions</li>
+                  <li class="breadcrumb-item"><a href="#">Game</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Report</li>
               </ol>
           </nav>
           <h2 class="h4">Top games bought by user </h2>
-          <p class="mb-0">Your web analytics dashboard template.</p>
       </div>
       <div class="btn-toolbar mb-2 mb-md-0">
           <a href="#" class="btn btn-sm btn-gray-800 d-inline-flex align-items-center">
               <svg class="icon icon-xs me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-              New Plan
+              New Game
           </a>
           <div class="btn-group ms-2 ms-lg-3">
               <button type="button" class="btn btn-sm btn-outline-gray-600">Share</button>
@@ -69,11 +68,13 @@
       <table class="table table-hover">
           <thead>
               <tr>
-                  {% for item in column %}
-                  <th class="border-gray-200">{{ item }}</th>
-                  {% empty %} 
-                    <p>somethings is wrong</p>
-                  {% endfor %}
+                  <th class="border-gray-200">Name</th>
+                  <th class="border-gray-200">Price</th>
+                  <th class="border-gray-200">Rating</th>
+                  <th class="border-gray-200">Date</th>
+                  <th class="border-gray-200">Refounded</th>
+                  <th class="border-gray-200">email</th>
+                  <th class="border-gray-200">Kind</th>
               </tr>
           </thead>
           <tbody>
@@ -82,54 +83,22 @@
             <tr>
                 <td>
                     <a href="#" class="fw-bold">
-                        {{ item.price }}
+                        {{ item.Name }}
                     </a>
                 </td>
                 <td>
-                    <span class="fw-normal">{{ item.refounded }}</span>
+                    <span class="fw-normal">{{ item.price }}</span>
                 </td>
-                <td><span class="fw-normal">{{ item.date }}</span></td>                        
-                <td><span class="fw-normal">{{ item.number_of_games }}</span></td>
-                <td><span class="fw-bold">{{ item.Name }}</span></td>
-                <td><span class="fw-bold text-success">{{ item.Rating }}</span></td>
-                <td><span class="fw-bold text-success">{{ item.email }}</span></td>
+                <td><span class="fw-normal">{{ item.Rating }}</span></td>                        
+                <td><span class="fw-bold">{{ item.date }}</span></td>
+                <td><span class="fw-normal">{{ item.refounded }}</span></td>
+                <td><span class="fw-bold">{{ item.email }}</span></td>
+                <td><span class="fw-bold">{{ item.Kind }}</span></td>
+                <!-- <td><span class="fw-bold text-success">{{ item.email }}</span></td> -->
             </tr> 
             {% empty %} 
                 <p>somethings is wrong</p>
-            {% endfor %}
-
-              <!-- Item -->
-              <tr>
-                  <td>
-                      <a href="#" class="fw-bold">
-                          456478
-                      </a>
-                  </td>
-                  <td>
-                      <span class="fw-normal">Platinum Subscription Plan</span>
-                  </td>
-                  <td><span class="fw-normal">1 May 2020</span></td>                        
-                  <td><span class="fw-normal">1 Jun 2020</span></td>
-                  <td><span class="fw-bold">$799,00</span></td>
-                  <td><span class="fw-bold text-warning">Due</span></td>
-                  <td><span class="fw-bold text-warning">Due</span></td>
-              </tr>
-              <!-- Item -->
-              <tr>
-                  <td>
-                      <a href="#" class="fw-bold">
-                          456423
-                      </a>
-                  </td>
-                  <td>
-                      <span class="fw-normal">Platinum Subscription Plan</span>
-                  </td>
-                  <td><span class="fw-normal">1 Apr 2020</span></td>                        
-                  <td><span class="fw-normal">1 May 2020</span></td>
-                  <td><span class="fw-bold">$799,00</span></td>
-                  <td><span class="fw-bold text-success">Paid</span></td>
-                  <td><span class="fw-bold text-warning">Due</span></td>
-              </tr>                                
+            {% endfor %}                               
           </tbody>
       </table>
       <div class="card-footer px-3 border-0 d-flex flex-column flex-lg-row align-items-center justify-content-between">
