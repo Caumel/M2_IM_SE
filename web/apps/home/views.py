@@ -43,7 +43,10 @@ clientM = DBClient(NOSQL_URL,NOSQL_NAME,NOSQL_USER,NOSQL_PASS,NOSQL_AUTH)
 
 @login_required(login_url="/login/")
 def index(request):
-    context = {'segment': 'index'}
+    global kindDB
+    
+    context = {'segment': 'index',
+                'kindDB': kindDB}
 
     html_template = loader.get_template('home/dashboard.html')
     return HttpResponse(html_template.render(context, request))
@@ -51,7 +54,8 @@ def index(request):
 
 @login_required(login_url="/login/")
 def pages(request):
-    context = {}
+    global kindDB
+    context = {'kindDB': kindDB}
     # All resource paths end in .html.
     # Pick out the html file name from the url. And load that template.
     try:
@@ -73,6 +77,18 @@ def pages(request):
     except:
         html_template = loader.get_template('home/page-500.html')
         return HttpResponse(html_template.render(context, request))
+
+def changeDB(request):
+    global kindDB
+    if kindDB=="SQL":
+        kindDB="NoSQL"
+    else:
+        kindDB="SQL"
+    context = {'segment': 'index',
+                'kindDB': kindDB}
+
+    html_template = loader.get_template('home/dashboard.html')
+    return HttpResponse(html_template.render(context, request))
 
 def executeScriptsFromFile(filename):
     # Open and read the file as a single buffer
@@ -96,8 +112,7 @@ def executeScriptsFromFile(filename):
 
 def importSQL(request):
     global kindDB
-    kindDB = "SQL"
-
+    
     executeScriptsFromFile('/db/sql/backup/db.sql')
     mysql.mydb.commit()
 
@@ -115,7 +130,7 @@ def importSQL(request):
 
     time.sleep(2)
 
-    context = {'segment': 'index'}
+    context = {'segment': 'index', 'kindDB': kindDB}
     html_template = loader.get_template('home/dashboard.html')
 
     return redirect(request.META['HTTP_REFERER'])
@@ -123,8 +138,6 @@ def importSQL(request):
 def migrationMethod(request):
 
     global kindDB
-    kindDB = "NoSQL"
-    
 
     migration = migrationNoSQL()
     migration.cleanDatabase(migration.clientM)
@@ -132,7 +145,7 @@ def migrationMethod(request):
 
     time.sleep(2)
 
-    context = {'segment': 'index'}
+    context = {'segment': 'index', 'kindDB': kindDB}
     html_template = loader.get_template('home/dashboard.html')
 
     return redirect(request.META['HTTP_REFERER'])
@@ -140,26 +153,28 @@ def migrationMethod(request):
 def useCase1NoSQL(request):
 
     global kindDB
-
+    result_dict = []
     if kindDB == "SQL":
-        query = "SELECT ULGame.price, Original_Game.name, ULGame.refounded, ULGame.`date`, Original_Game.rating, ULGame.email FROM (SELECT UserLibrary.email, Game.price, Game.refounded, Game.`date`, Game.Original_Gameoriginal_game_id FROM (SELECT User.email, User.password, User.carddata, Library.number_of_games, Library.library_id FROM User LEFT JOIN Library ON User.user_id = Library.library_id WHERE User.email = 'luiscaumel@gmail.com') AS UserLibrary LEFT JOIN Game ON UserLibrary.library_id = Game.Librarylibrary_id ORDER BY price DESC) AS ULGame LEFT JOIN Original_Game ON ULGame.Original_Gameoriginal_game_id = Original_Game.original_game_id"
-        mysql.client.execute(query)
-        result = mysql.client.fetchall()
-        result = [list(row) for row in result]
-        result_dict = []
-        for i in result:
-            game = {}
-            game["Name"] = i[1]
-            game["price"] = i[0]
-            game["Rating"] = i[4]
-            game["date"] = i[3].strftime("%Y-%m-%d")
-            if i[2]==0:
-                game["refounded"] = False
-            else:
-                game["refounded"] = True
-            game["email"] = i[5]
-            game["Kind"] = "SQL"
-            result_dict.append(game)
+        try:
+            query = "SELECT ULGame.price, Original_Game.name, ULGame.refounded, ULGame.`date`, Original_Game.rating, ULGame.email FROM (SELECT UserLibrary.email, Game.price, Game.refounded, Game.`date`, Game.Original_Gameoriginal_game_id FROM (SELECT User.email, User.password, User.carddata, Library.number_of_games, Library.library_id FROM User LEFT JOIN Library ON User.user_id = Library.library_id WHERE User.email = 'luiscaumel@gmail.com') AS UserLibrary LEFT JOIN Game ON UserLibrary.library_id = Game.Librarylibrary_id ORDER BY price DESC) AS ULGame LEFT JOIN Original_Game ON ULGame.Original_Gameoriginal_game_id = Original_Game.original_game_id"
+            mysql.client.execute(query)
+            result = mysql.client.fetchall()
+            result = [list(row) for row in result]
+            for i in result:
+                game = {}
+                game["Name"] = i[1]
+                game["price"] = i[0]
+                game["Rating"] = i[4]
+                game["date"] = i[3].strftime("%Y-%m-%d")
+                if i[2]==0:
+                    game["refounded"] = False
+                else:
+                    game["refounded"] = True
+                game["email"] = i[5]
+                game["Kind"] = "SQL"
+                result_dict.append(game)
+        except:
+            print("not exist SQL data imported")
         
     
     elif kindDB == "NoSQL":
@@ -240,7 +255,6 @@ def useCase1NoSQL(request):
                 "$sort":{"price": -1}
             }]
         result = clientM.client["db"]["Game"].aggregate(pipeline)
-        result_dict = []
         for i in result:
             i["Kind"] = "NoSQL"
             result_dict.append(i)
@@ -248,6 +262,7 @@ def useCase1NoSQL(request):
     print(result_dict)
     context = {
         'resultList': result_dict,
+        'kindDB': kindDB
         }
 
     return render(request, 'home/reportLuis.html', context)
