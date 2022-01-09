@@ -6,18 +6,23 @@ services:
     image : mongo:latest
     container_name: mongodb
     restart: always
+    working_dir: /backup
     ports:
       - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_NON_ROOT_USERNAME: user
+      MONGO_NON_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: db
     volumes:
-      - ../db/mongodb:/db_data/
+      - ../db/mongodb/backup:/backup
 
   db:
     image: mysql:latest
     container_name: db
     restart: always
+    working_dir: /backup
     environment:
       MYSQL_DATABASE: db
       MYSQL_USER: user
@@ -28,18 +33,32 @@ services:
     expose:
       - '3306'
     volumes:
-      - ../db/sql/backup:/docker-entrypoint-initdb.d
+      #- ../db/sql/backup:/docker-entrypoint-initdb.d
+      - ../db/sql/backup:/backup
 
   web:
     build:
       context: ..
       dockerfile: ./web/Dockerfile
     container_name: 'web'
+    environment:
+      DDBB_SQL_URL: db
+      DDBB_SQL_PORT: 3306
+      DDBB_SQL_USER: 'user'
+      DDBB_SQL_USER_ROOT: 'root'
+      DDBB_SQL_PASS: 'password'
+      DDBB_SQL_NAME: 'db'
+      DDBB_NOSQL_URL: mongo
+      DDBB_NOSQL_PORT: 27017
+      DDBB_NOSQL_USER: 'admin'
+      DDBB_NOSQL_PASS: 'admin'
+      DDBB_NOSQL_AUTHDB: 'admin'
     ports:
       - "8000:8000"
     volumes:
+      - ../db:/db
       - ../web/:/src
-    command: /bin/sh -c "sleep 10; python manage.py migrate && python -u manage.py runserver_plus 0.0.0.0:8000 --cert-file certificate/app.crt --key-file certificate/app.key"
+    command: /bin/sh -c "sleep 20; python manage.py migrate && python -u manage.py runserver_plus 0.0.0.0:8000 --cert-file certificate/app.crt --key-file certificate/app.key"
 
 
 # python manage.py migrate && python -u manage.py runserver_plus 0.0.0.0:8000 --cert-file certificate/app.crt --key-file certificate/app.key
