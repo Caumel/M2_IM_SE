@@ -151,12 +151,12 @@ def migrationMethod(request):
     return redirect(request.META['HTTP_REFERER'])
 
 def useCase1NoSQL(request):
-
     global kindDB
+    userString = "'" + str(request.user.username) + "'"
     result_dict = []
     if kindDB == "SQL":
         try:
-            query = "SELECT ULGame.price, Original_Game.name, ULGame.refounded, ULGame.`date`, Original_Game.rating, ULGame.email FROM (SELECT UserLibrary.email, Game.price, Game.refounded, Game.`date`, Game.Original_Gameoriginal_game_id FROM (SELECT User.email, User.password, User.carddata, Library.number_of_games, Library.library_id FROM User LEFT JOIN Library ON User.user_id = Library.library_id WHERE User.email = 'luiscaumel@gmail.com') AS UserLibrary LEFT JOIN Game ON UserLibrary.library_id = Game.Librarylibrary_id ORDER BY price DESC) AS ULGame LEFT JOIN Original_Game ON ULGame.Original_Gameoriginal_game_id = Original_Game.original_game_id"
+            query = f"SELECT ULGame.price, Original_Game.name, ULGame.refounded, ULGame.`date`, Original_Game.rating, ULGame.email FROM (SELECT UserLibrary.email, Game.price, Game.refounded, Game.`date`, Game.Original_Gameoriginal_game_id FROM (SELECT User.email, User.password, User.carddata, Library.number_of_games, Library.library_id FROM User LEFT JOIN Library ON User.user_id = Library.library_id WHERE User.email = {userString}) AS UserLibrary LEFT JOIN Game ON UserLibrary.library_id = Game.Librarylibrary_id ORDER BY price DESC) AS ULGame LEFT JOIN Original_Game ON ULGame.Original_Gameoriginal_game_id = Original_Game.original_game_id"
             mysql.client.execute(query)
             result = mysql.client.fetchall()
             result = [list(row) for row in result]
@@ -249,7 +249,7 @@ def useCase1NoSQL(request):
                     }
             },
             {
-                "$match": {"email":"luiscaumel@gmail.com"},
+                "$match": {"email":request.user.username},
             },
             {
                 "$sort":{"price": -1}
@@ -355,12 +355,11 @@ db.Game.aggregate([
         $project:
             {
                 _id:0,
-                Name: 1,
-                Rating: 1,
                 price:1,
+                Name: 1,
                 refounded:1,
                 date:1,
-                number_of_games:1,
+                Rating: 1,
                 email: "$user.email",
             }
     },
