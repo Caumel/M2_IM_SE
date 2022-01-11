@@ -537,6 +537,14 @@
             })
         });
 
+        document.getElementById('warningAlert').addEventListener('click', function () {
+            swalWithBootstrapButtons.fire(
+                'Warning alert',
+                'Migration didnt work, please press Import SQL button',
+                'warning'
+            )
+        });
+
     </script>
 
 

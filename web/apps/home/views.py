@@ -25,6 +25,7 @@ from dateutil.relativedelta import relativedelta
 
 
 kindDB = "SQL"
+SQLButtonPress = False
 
 SQL_URL = os.getenv("DDBB_SQL_URL","localhost")
 SQL_PORT = os.getenv("DDBB_SQL_PORT",3306)
@@ -114,7 +115,10 @@ def executeScriptsFromFile(filename):
 
 def importSQL(request):
     global kindDB
-    
+    global SQLButtonPress
+    SQLButtonPress = True
+
+
     executeScriptsFromFile('/db/sql/backup/db.sql')
     mysql.mydb.commit()
 
@@ -140,17 +144,20 @@ def importSQL(request):
 def migrationMethod(request):
 
     global kindDB
+    global SQLButtonPress
 
-    migration = migrationNoSQL()
-    migration.cleanDatabase(migration.clientM)
-    migration.importDataMongo()
+    if SQLButtonPress:
+        migration = migrationNoSQL()
+        migration.cleanDatabase(migration.clientM)
+        migration.importDataMongo()
 
     time.sleep(2)
 
-    context = {'segment': 'index', 'kindDB': kindDB}
+    context = {'segment': 'index', 'kindDB': kindDB, "SQLButtonPress":SQLButtonPress}
     html_template = loader.get_template('home/dashboard.html')
-
+    #render(request, 'home/reportLuis.html', context)
     return redirect(request.META['HTTP_REFERER'])
+    
 
 def useCase1NoSQL(request):
     
@@ -279,6 +286,7 @@ def useCase1NoSQL(request):
         for i in result:
             i["Kind"] = "NoSQL"
             i["date"] = i["date"].strftime("%Y-%m-%d")
+            i["refounded"] = True if i["refounded"]==1 else False
             result_dict.append(i)
 
     print(result_dict)

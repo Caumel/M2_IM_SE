@@ -58,7 +58,7 @@ services:
     volumes:
       - ../db:/db
       - ../web/:/src
-    command: /bin/sh -c "sleep 20; python manage.py migrate && python -u manage.py runserver_plus 0.0.0.0:8000 --cert-file certificate/app.crt --key-file certificate/app.key"
+    command: /bin/sh -c "sleep 13; python manage.py migrate && python -u manage.py runserver_plus 0.0.0.0:8000 --cert-file certificate/app.crt --key-file certificate/app.key"
 
 
 # python manage.py migrate && python -u manage.py runserver_plus 0.0.0.0:8000 --cert-file certificate/app.crt --key-file certificate/app.key
