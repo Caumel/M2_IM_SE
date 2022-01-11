@@ -43,8 +43,11 @@ def login_view(request):
         if form.is_valid():
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password")
+            sql = f"SELECT User.email, User.password FROM User WHERE User.email = '{username}'"
+            mysql.client.execute(sql)
+            result = mysql.client.fetchall()
             user = authenticate(username=username, password=password)
-            if user is not None:
+            if user is not None and result != []:
                 login(request, user)
                 return redirect("/dashboard.html")
             else:

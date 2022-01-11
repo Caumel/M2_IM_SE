@@ -88,7 +88,7 @@ CREATE TABLE `Game` (
 
 LOCK TABLES `Game` WRITE;
 /*!40000 ALTER TABLE `Game` DISABLE KEYS */;
-INSERT INTO `Game` VALUES (1,40,_binary '\0','2011-11-11',1,1),(2,60,_binary '\0','2011-11-11',1,2),(3,60,_binary '\0','2011-11-11',2,2),(4,20,_binary '\0','2011-11-11',2,3);
+INSERT INTO `Game` VALUES (1,40,_binary '\0','2021-11-11',1,1),(2,60,_binary '\0','2021-10-11',1,2),(3,60,_binary '\0','2021-09-11',2,2),(4,20,_binary '\0','2021-01-10',2,3);
 /*!40000 ALTER TABLE `Game` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -286,7 +286,7 @@ CREATE TABLE `User_Follow_User` (
 
 LOCK TABLES `User_Follow_User` WRITE;
 /*!40000 ALTER TABLE `User_Follow_User` DISABLE KEYS */;
-INSERT INTO `User_Follow_User` VALUES (1,2,'2011-11-11'),(2,1,'2011-11-11');
+INSERT INTO `User_Follow_User` VALUES (1,2,'2021-11-11'),(2,1,'2021-11-11');
 /*!40000 ALTER TABLE `User_Follow_User` ENABLE KEYS */;
 UNLOCK TABLES;
 

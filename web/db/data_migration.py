@@ -1,3 +1,4 @@
+from datetime import datetime
 from logging import exception
 import os
 from db.clientSQL import clientSQL
@@ -150,13 +151,13 @@ class migrationNoSQL:
         original_game_id = {}
         for index,element in enumerate(original_game):
             #Add company
-            element["Company_id"] = company_id[element["Companycompany_id"]]
+            element["Company_id"] = ObjectId(company_id[element["Companycompany_id"]])
             del element["Companycompany_id"]
             #Add genre
             listGenre = []
             for elementGenre in original_game_have_genre:
                 if elementGenre["Original_Gameoriginal_game_id"] == index + 1:
-                    listGenre.append(genre_id[elementGenre["Genregenre_id"]])
+                    listGenre.append(ObjectId(genre_id[elementGenre["Genregenre_id"]]))
             element["GenreIds"] = listGenre
             del element["original_game_id"]
             #Add bbdd
@@ -178,7 +179,7 @@ class migrationNoSQL:
         community_id = {}
         for index,element in enumerate(community):
             del element["community_id"]
-            element["userCreator"] = str(user_id[element["Useruser_id"]])
+            element["userCreator"] = ObjectId(user_id[element["Useruser_id"]])
             del element["Useruser_id"]
             result = clientM.insert_one("Community",element)
             community_id[index+1] = str(result.inserted_id)
@@ -211,7 +212,7 @@ class migrationNoSQL:
             del element["Librarylibrary_id"]
             element["OriginalGameId"] = ObjectId(original_game_id[element["Original_Gameoriginal_game_id"]])
             del element["Original_Gameoriginal_game_id"]
-            element["date"] = element["date"].strftime('%Y-%m-%d')
+            element["date"] = datetime.strptime(element["date"].strftime('%Y-%m-%d'),'%Y-%m-%d')
             result = clientM.insert_one("Game",element)
             game_id[index+1] = str(result.inserted_id)
         print(game_id)
@@ -221,15 +222,15 @@ class migrationNoSQL:
         for index,element in enumerate(review):
             del element["review_id"]
             element["date"] = element["date"].strftime('%Y-%m-%d')
-            element["userId"] = user_id[element["Useruser_id"]]
+            element["userId"] = ObjectId(user_id[element["Useruser_id"]])
             del element["Useruser_id"]
             try:
-                element["OriginalGameId"] = original_game_id[element["Original_Gameoriginal_game_id"]]
+                element["OriginalGameId"] = ObjectId(original_game_id[element["Original_Gameoriginal_game_id"]])
             except Exception as e:
                 element["OriginalGameId"] = None
             del element["Original_Gameoriginal_game_id"]
             try:
-                element["CompanyId"] = original_game_id[element["Companycompany_id"]]
+                element["CompanyId"] = ObjectId(original_game_id[element["Companycompany_id"]])
             except Exception as e:
                 element["CompanyId"] = None
             del element["Companycompany_id"]
@@ -240,9 +241,9 @@ class migrationNoSQL:
         #Review rate
         review_rate_id = {}
         for index,element in enumerate(user_rate_review):
-            element["UserId"] = user_id[element["Useruser_id"]]
+            element["UserId"] = ObjectId(user_id[element["Useruser_id"]])
             del element["Useruser_id"]
-            element["ReviewId"] = review_id[element["Reviewreview_id"]]
+            element["ReviewId"] = ObjectId(review_id[element["Reviewreview_id"]])
             del element["Reviewreview_id"]
             result = clientM.insert_one("Review_rate",element)
             review_rate_id[index+1] = str(result.inserted_id)
@@ -251,9 +252,9 @@ class migrationNoSQL:
         #Original Game rate
         original_game_rate_id = {}
         for index,element in enumerate(user_rate_original_game):
-            element["UserId"] = user_id[element["Useruser_id"]]
+            element["UserId"] = ObjectId(user_id[element["Useruser_id"]])
             del element["Useruser_id"]
-            element["OriginalGameId"] = original_game_id[element["Original_Gameoriginal_game_id"]]
+            element["OriginalGameId"] = ObjectId(original_game_id[element["Original_Gameoriginal_game_id"]])
             del element["Original_Gameoriginal_game_id"]
             result = clientM.insert_one("Original_Game_rate",element)
             original_game_rate_id[index+1] = str(result.inserted_id)
